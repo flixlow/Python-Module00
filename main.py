@@ -126,7 +126,7 @@ def main():
     print("5 - ft_count_harvest    (Count days to harvest)")
     print("6 - ft_garden_summary   (Display garden info)")
     print("7 - ft_seed_inventory    (Seed inventory with type hints)")
-    print("r - remove __pycache__  (Delete all __pycache__ folders under this project)")
+    print("r - remove __pycache__  (Delete all __pycache__ folders)")
     print("a - test all exercises")
     print()
 
