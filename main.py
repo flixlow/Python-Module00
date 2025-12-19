@@ -14,49 +14,77 @@ How it works:
 Make sure your exercise files are in the same folder as this main.py file!
 """
 
+import os
+import importlib.util
+import shutil
+
+
+def remove_pycache(root_dir: str) -> None:
+    """Remove all __pycache__ directories under root_dir."""
+    for dirpath, dirnames, _ in os.walk(root_dir):
+        if "__pycache__" in dirnames:
+            pycache_path = os.path.join(dirpath, "__pycache__")
+            try:
+                shutil.rmtree(pycache_path)
+                print(f"Removed: {pycache_path}")
+            except Exception as e:
+                print(f"Could not remove {pycache_path}: {e}")
+
 
 def test_ft_exercise(exercise_file_name):
     """
     This function tries to run one of your exercises.
 
-    For example: test_ft_exercise("ft_plot_area") will:
-    - Look for a file called ft_plot_area.py
-    - Import it
-    - Call the function ft_plot_area() inside it
+    It first tries a normal import like before. If that fails, it searches
+    recursively for a file named <exercise_file_name>.py under the main.py
+    directory and loads it directly from the found file path.
     """
     print(f"\n=== Testing {exercise_file_name} ===")
 
+    def find_file(root, filename):
+        for dirpath, _, files in os.walk(root):
+            if filename in files:
+                return os.path.join(dirpath, filename)
+        return None
+
+    def load_module_from_file(filepath, module_name):
+        spec = importlib.util.spec_from_file_location(module_name, filepath)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+
     try:
-        # Import your exercise file
-        # This is like doing: import ft_plot_area
-        ft_module = __import__(exercise_file_name)
+        try:
+            # Try normal import first
+            ft_module = __import__(exercise_file_name)
+        except ImportError:
+            # If import fails, search for the file in subfolders
+            root_dir = os.path.dirname(__file__)
+            file_path = find_file(root_dir, f"{exercise_file_name}.py")
+            if not file_path:
+                # re-raise to be handled by outer ImportError
+                raise
+            ft_module = load_module_from_file(file_path, exercise_file_name)
 
         # Get the function from your file
-        # This is like doing: ft_plot_area.ft_plot_area
         ft_function = getattr(ft_module, exercise_file_name)
 
         # Special handling for ft_seed_inventory (Exercise 7)
-        # This function takes parameters, unlike the others
         if exercise_file_name == "ft_seed_inventory":
             print("Testing with different seed types and units:\n")
-            # Test with packets
             ft_function("tomato", 15, "packets")
-            # Test with grams
             ft_function("carrot", 8, "grams")
-            # Test with area
             ft_function("lettuce", 12, "area")
-            # Test with unknown unit
             print("\nTesting with unknown unit:")
             ft_function("basil", 5, "unknown")
         else:
-            # Run your function normally (no parameters)
             ft_function()
 
     except ImportError:
         print(f"❌ Could not find {exercise_file_name}.py")
         print(
             """   Make sure your file exists and is in the same
-            folder as main.py"""
+            folder as main.py or in one of its subfolders"""
         )
 
     except AttributeError:
@@ -66,7 +94,6 @@ def test_ft_exercise(exercise_file_name):
     except TypeError as error:
         msg = str(error)
         if "missing" in msg and "required positional argument" in msg:
-
             print(f"❌ Function signature error: {error}")
             print(
                 """   For exercise 7, make sure your
@@ -99,6 +126,7 @@ def main():
     print("5 - ft_count_harvest    (Count days to harvest)")
     print("6 - ft_garden_summary   (Display garden info)")
     print("7 - ft_seed_inventory    (Seed inventory with type hints)")
+    print("r - remove __pycache__  (Delete all __pycache__ folders under this project)")
     print("a - test all exercises")
     print()
 
@@ -122,6 +150,9 @@ def main():
         test_ft_exercise("ft_garden_summary")
     elif choice == "7":
         test_ft_exercise("ft_seed_inventory")
+    elif choice == "r":
+        # Remove all __pycache__ directories under the script directory
+        remove_pycache(os.path.dirname(__file__))
     elif choice == "a":
         # Test all exercises one by one
         test_ft_exercise("ft_hello_garden")
@@ -134,7 +165,7 @@ def main():
         test_ft_exercise("ft_garden_summary")
         test_ft_exercise("ft_seed_inventory")
     else:
-        print("❌ Invalid choice! Please enter 0, 1, 2, 3, 4, 5, 6, 7, or a")
+        print("❌ Invalid choice! Please enter 0, 1, 2, 3, 4, 5, 6, 7, r, or a")
 
 
 # This line means: "If someone runs this file directly, call main()"

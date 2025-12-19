@@ -1,11 +1,8 @@
 def ft_harvest_total():
-    x = input("Day 1 harvest: ")
-    y = input("Day 1 harvest: ")
-    z = input("Day 1 harvest: ")
-    x = int(x)
-    y = int(y)
-    z = int(z)
-    print("Total harvest:", x + y + z)
+    total = int(input("Day 1 harvest: "))
+    total += int(input("Day 2 harvest: "))
+    total += int(input("Day 3 harvest: "))
+    print(f"Total harvest: {total}")
 
 
 # ft_harvest_total()
